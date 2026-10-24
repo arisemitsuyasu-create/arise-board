@@ -142,7 +142,7 @@ h1{font-weight:700;font-size:18px;margin:0;letter-spacing:.02em;white-space:nowr
 .mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 .mwd{position:sticky;top:0;z-index:2;background:var(--panel);padding:6px 4px;text-align:center;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
 .mwd.sun{color:var(--warn)} .mwd.sat{color:var(--tg)}
-.mcell{appearance:none;border:0;border-radius:0;min-height:100px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:4px 3px 6px;display:flex;flex-direction:column;gap:2px;cursor:pointer;min-width:0;background:none;text-align:left;touch-action:manipulation}
+.mcell{appearance:none;border:0;border-radius:0;height:var(--rowh,110px);overflow:hidden;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:4px 3px 6px;display:flex;flex-direction:column;gap:2px;cursor:pointer;min-width:0;background:none;text-align:left;touch-action:manipulation}
 .mcell:nth-child(7n){border-right:0}
 .mcell:hover{background:var(--line-soft)}
 .mcell:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
@@ -151,13 +151,14 @@ h1{font-weight:700;font-size:18px;margin:0;letter-spacing:.02em;white-space:nowr
 .mcell.sun .mnum{color:var(--warn)} .mcell.sat .mnum{color:var(--tg)}
 .mcell.today .mnum{background:var(--accent);color:var(--on-accent)}
 .mcell.sel{box-shadow:inset 0 0 0 2px var(--accent)}
-.chip{font-size:11px;line-height:1.35;padding:1px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--pc);background:var(--line-soft);background:color-mix(in srgb,var(--pc) 15%,var(--panel))}
+.chip{flex:none;font-size:11px;line-height:15px;padding:1px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--pc);background:var(--line-soft);background:color-mix(in srgb,var(--pc) 15%,var(--panel))}
 .chip.off{background:var(--pc);color:#fff;font-weight:700}
 .chip.half{background:transparent;border:1px solid var(--pc);border-left-width:3px;color:var(--pc);font-weight:700}
 .chip.tent{border:1px dashed var(--pc);border-left:3px dashed var(--pc);background:transparent}
 .chip b{font-weight:700}
 .chip .tm{font-family:var(--f-mono);font-size:10px;color:var(--muted)}
-.more{font-size:10px;color:var(--muted)}
+.more{font-size:10px;line-height:13px;color:var(--muted);padding-left:3px}
+.chip .n{font-family:var(--f-mono);font-size:10px;color:var(--muted);margin-left:2px}
 .pcol-0{--pc:#8a5a3c}.pcol-1{--pc:#2f6bc0}.pcol-2{--pc:#9a6000}.pcol-3{--pc:#1c7a9c}.pcol-4{--pc:#5f6470}.pcol-5{--pc:#2b7d4b}.pcol-6{--pc:#7a4fb0}.pcol-7{--pc:#b54a7a}.pcol-u{--pc:#8a8f8c}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.half{color:var(--ink)}}
 :root[data-theme="dark"] .chip.half{color:var(--ink)}
@@ -182,11 +183,18 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
   h1{font-size:16px}
   .status{font-size:11px}
   .top .btn{min-height:38px;padding:0 10px}
-  .bar{gap:8px}
-  .daypick{width:100%}
-  .daypick .lbl{font-size:20px}
-  .ctrls{width:100%;justify-content:space-between;gap:6px}
-  .navgrp .btn{padding:0 12px}
+  .bar{gap:6px;flex-wrap:nowrap}
+  .daypick{min-width:0;flex:1 1 auto}
+  .daypick .lbl{font-size:17px;white-space:nowrap}
+  .daypick .lbl small{font-size:12px}
+  .daypick .lbl .tdy{font-size:10px;padding:0 6px;margin-left:3px}
+  .daypick .caret{display:none}
+  .ctrls{flex:none;flex-wrap:nowrap;gap:4px}
+  .seg button{min-width:36px;min-height:36px;padding:0 8px}
+  .navgrp{gap:4px}
+  .navgrp .btn{min-width:36px;min-height:38px;padding:0 8px}
+  .top .btn{min-height:36px}
+  .foot{display:none}
   .legend{gap:4px 10px;font-size:11px}
   .foot{font-size:11px}
   .colhead{padding:6px 2px 4px;text-align:center}
@@ -207,14 +215,11 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
   .free .tl{font-size:8px}
   .offlabel{margin:10px 2px 0;font-size:11px;padding:3px 1px;top:56px}
   .mwd{font-size:11px;padding:4px 2px}
-  .mcell{min-height:68px;padding:2px 1px 4px;gap:2px}
+  .mcell{padding:2px 1px 2px;gap:2px}
   .mnum{font-size:11px;line-height:18px;min-width:20px}
-  .chip{font-size:10px;line-height:1.3;padding:1px 2px;border-left-width:2px;white-space:normal;overflow-wrap:anywhere}
-  .chip b{display:block}
-  .chip .tm{white-space:nowrap}
-  .chip.off b,.chip.half b{display:inline}
+  .chip{font-size:10px;line-height:13px;padding:1px 2px;border-left-width:2px;text-overflow:clip}
   .chip.tent{border-left-width:2px}
-  .chip .tm{font-size:9.5px}
+  .chip .n{font-size:9.5px;margin-left:1px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
@@ -245,6 +250,9 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
 
   <div class="notice" id="notice" hidden></div>
 
+
+  <div class="month" id="month" hidden></div>
+  <div class="board-wrap" id="boardWrap" hidden><div class="board" id="board"></div></div>
   <div class="legend" id="legendDay" hidden>
     <span><i class="sw" style="background:var(--tg-bg);border-color:var(--tg)"></i>東京ガス</span>
     <span><i class="sw" style="background:var(--gd-bg);border-color:var(--gd)"></i>グリーンデイズ</span>
@@ -254,9 +262,6 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
     <span><i class="sw off"></i>休み・稼働日でない</span>
   </div>
   <div class="legend" id="legendMonth" hidden></div>
-
-  <div class="month" id="month" hidden></div>
-  <div class="board-wrap" id="boardWrap" hidden><div class="board" id="board"></div></div>
 
   <div class="foot">キャンセルの案件は出しません。休み・稼働日は台帳の「休み・稼働日」シートから。予定を変えるときは台帳かLINEで（このページからは変えられません）。</div>
 </div>
@@ -270,6 +275,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
 (function(){
   "use strict";
   const DAY_START = 8*60, DAY_END = 19*60;   // 空きを数える枠（8:00〜19:00）
+  const VIEW_START = 6*60, VIEW_END = 21*60;  // 日の表示の目盛り（6:00〜21:00）
   const WD = ["日","月","火","水","木","金","土"];
   const REFRESH_MS = 120000;                   // 2分ごとに読み直す
   const $ = id => document.getElementById(id);
@@ -385,7 +391,10 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
     if(mode==="month")renderMonth();else renderDay();
   }
 
-  function renderDay(){
+  // 画面の下の端まで使える高さ
+  function roomBelow(el){return innerHeight-(el.getBoundingClientRect().top+scrollY)-(isNarrow()?6:12)}
+  let dayH=0;
+  function renderDay(again){
     const evs={};
     db.plan.forEach(p=>{if(p.ymd!==cur||p.s==null)return;const w=p.who||"未定";(evs[w]=evs[w]||[]).push(p)});
     const cols=db.staff.filter(s=>s.type!=="対象外"||evs[s.name]).map(s=>Object.assign({},s));
@@ -394,11 +403,11 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
     Object.keys(evs).filter(n=>!known.has(n)&&n!=="未定").forEach(n=>cols.push({name:n,type:"名簿外",ci:-1}));
     if(evs["未定"])cols.push({name:"未定",type:"未定",ci:-1});
 
-    let lo=DAY_START,hi=DAY_END;
+    let lo=VIEW_START,hi=VIEW_END;
     Object.values(evs).forEach(l=>l.forEach(v=>{lo=Math.min(lo,Math.floor(v.s/60)*60);hi=Math.max(hi,Math.ceil(v.e/60)*60)}));
     hi=Math.min(hi,24*60);
     const narrow=isNarrow();
-    const H=narrow?48:56;                       // 1時間の高さ
+    const H=dayH||(narrow?40:46);               // 1時間の高さ（画面の高さに合わせて決め直す）
     const px=m=>(m-lo)/60*H, height=px(hi);
     const board=$("board");
     board.style.gridTemplateColumns=(narrow?"28px":"48px")+" repeat("+cols.length+",minmax(0,1fr))";
@@ -414,7 +423,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
       html+='<div class="colhead"><div class="nm">'+esc(s.name)+'</div><div class="tag'+tc+'" title="'+esc(s.st.tag)+'">'+esc(tag)+'</div></div>';
     });
     html+='<div class="axis" style="height:'+height+'px">';
-    for(let m=lo;m<=hi;m+=60)html+='<div style="top:'+Math.max(px(m),8)+'px">'+(narrow?(m/60):hm(m))+'</div>';
+    for(let m=lo;m<hi;m+=60)html+='<div style="top:'+Math.max(px(m),8)+'px">'+(narrow?(m/60):hm(m))+'</div>';
     html+='</div>';
 
     const nowM=cur===todayStr()?(()=>{const n=new Date();return n.getHours()*60+n.getMinutes()})():null;
@@ -449,6 +458,11 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
     });
     board.innerHTML=html;
     board.querySelectorAll(".ev").forEach(b=>b.onclick=()=>openDetail(b.dataset.id,b.dataset.who));
+    // スクロールしなくても1日が収まるよう、1時間の高さを画面に合わせる（小さくなりすぎるときはスクロール）
+    const head=board.querySelector(".axis-head").offsetHeight;
+    const fit=Math.floor((roomBelow(board)-head-2)/((hi-lo)/60));
+    const want=Math.max(narrow?30:34,Math.min(72,fit));
+    if(!again&&want!==H){dayH=want;return renderDay(true)}
     function free(a,b){return'<div class="free" style="top:'+(px(a)+2)+'px;height:'+(px(b)-px(a)-4)+'px"><span>空き</span><span>'+hm(a)+'<span class="tl">〜</span><span class="fe">'+hm(b)+'</span></span></div>'}
   }
   // スマホでは列の見出しを短くする
@@ -467,11 +481,22 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
     const last=new Date(d0.getFullYear(),d0.getMonth()+1,0);
     const end=new Date(last);end.setDate(last.getDate()+(6-((last.getDay()+6)%7)));
     const lo=keyOf(start),hi=keyOf(end);
+    const weeks=Math.round((end-start)/864e5+1)/7;
+    const narrow=isNarrow();
     const offs={},jobs={};
     db.off.forEach(o=>{if(!o.ymd||o.ymd<lo||o.ymd>hi)return;(offs[o.ymd]=offs[o.ymd]||[]).push(o)});
     db.plan.forEach(p=>{if(p.ymd<lo||p.ymd>hi)return;(jobs[p.ymd]=jobs[p.ymd]||[]).push(p)});
 
-    let h='<div class="mgrid">';
+    // 1か月が画面に収まるよう、1週の高さを決める（そこに入る行数だけ出し、残りは「+◯」）
+    const box=$("month");
+    const headH=narrow?22:28;
+    const rowh=Math.max(narrow?62:84,Math.floor((roomBelow(box)-headH-2)/weeks));
+    const numH=narrow?22:28, lineH=narrow?19:21;
+    const fitLines=Math.max(1,Math.floor((rowh-numH-2)/lineH));
+    const order=n=>db.ci[n]!=null?db.ci[n]:(n?90:99);
+    const nick=n=>narrow&&n.length>2?n.slice(0,2):n;
+
+    let h='<div class="mgrid" style="--rowh:'+rowh+'px">';
     ["月","火","水","木","金","土","日"].forEach((w,i)=>h+='<div class="mwd'+(i===5?' sat':i===6?' sun':'')+'">'+w+'</div>');
     const today=todayStr();
     for(let x=new Date(start);keyOf(x)<=hi;x.setDate(x.getDate()+1)){
@@ -480,24 +505,36 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
       if(x.getMonth()!==d0.getMonth())cl.push("other");
       if(wd===0)cl.push("sun");if(wd===6)cl.push("sat");
       if(k===today)cl.push("today");
-      const o=offs[k]||[],j=(jobs[k]||[]).slice().sort((a,b)=>(a.s==null?9999:a.s)-(b.s==null?9999:b.s)||(db.ci[a.who]??99)-(db.ci[b.who]??99));
-      let c='<button type="button" class="'+cl.join(" ")+'" data-d="'+k+'" aria-label="'+(x.getMonth()+1)+'月'+x.getDate()+'日（'+WD[wd]+'） 予定'+j.length+'件">';
+      // 人ごとにまとめる：休み → 予定のある人（名簿の順）
+      const ppl={};
+      (offs[k]||[]).forEach(o=>{if(/^(終日|午前|午後)/.test(o.k)){const p=ppl[o.name]=ppl[o.name]||{name:o.name,jobs:[]};p.off=o.k.slice(0,2)}});
+      (jobs[k]||[]).forEach(v=>{const n=v.who||"未定";(ppl[n]=ppl[n]||{name:n,jobs:[]}).jobs.push(v)});
+      const list=Object.values(ppl).sort((a,b)=>((a.off==="終日")?0:1)-((b.off==="終日")?0:1)||order(a.name)-order(b.name));
+      const total=(jobs[k]||[]).length;
+      let c='<button type="button" class="'+cl.join(" ")+'" data-d="'+k+'" aria-label="'+(x.getMonth()+1)+'月'+x.getDate()+'日（'+WD[wd]+'） 予定'+total+'件">';
       c+='<span class="mnum">'+x.getDate()+'</span>';
-      o.filter(v=>/^終日/.test(v.k)).forEach(v=>c+='<span class="chip off '+pcol(v.name)+'">'+esc(v.name)+'休み</span>');
-      o.filter(v=>/^(午前|午後)/.test(v.k)).forEach(v=>c+='<span class="chip half '+pcol(v.name)+'">'+esc(v.name)+' '+esc(v.k.slice(0,2))+'休</span>');
-      j.forEach(v=>{
-        c+='<span class="chip '+pcol(v.who)+(v.status==="仮押さえ"?' tent':'')+'"><b>'+esc(v.who||"未定")+'</b> '+
-          (v.s!=null?'<span class="tm">'+hm(v.s)+'</span> ':'')+'<span class="cn">'+esc(shortClient(v.client||v.kind||""))+'</span></span>';
+      const show=list.length>fitLines?list.slice(0,fitLines-1):list;
+      show.forEach(p=>{
+        const js=p.jobs.slice().sort((a,b)=>(a.s==null?9999:a.s)-(b.s==null?9999:b.s));
+        const pc=pcol(p.name==="未定"?"":p.name);
+        const tent=js.some(v=>v.status==="仮押さえ");
+        const tip=p.name+(p.off?" "+(p.off==="終日"?"休み":p.off+"休み"):"")+js.map(v=>" "+(v.s!=null?hm(v.s):"")+" "+shortClient(v.client||v.kind||"")).join("");
+        if(p.off==="終日"&&!js.length){c+='<span class="chip off '+pc+'" title="'+esc(tip)+'">'+esc(nick(p.name))+(narrow?'休':'休み')+'</span>';return}
+        let inner='<b>'+esc(nick(p.name))+'</b>';
+        if(p.off&&p.off!=="終日")inner+=narrow?'<span class="n">'+esc(p.off)+'</span>':' <span class="tm">'+esc(p.off)+'休</span>';
+        if(narrow){if(js.length&&!p.off)inner+='<span class="n">'+js.length+'件</span>'}
+        else js.forEach(v=>{inner+='　'+(v.s!=null?'<span class="tm">'+hm(v.s)+'</span> ':'')+esc(shortClient(v.client||v.kind||""))});
+        c+='<span class="chip '+pc+(p.off?' half':'')+(tent&&!p.off?' tent':'')+'" title="'+esc(tip)+'">'+inner+'</span>';
       });
+      if(show.length<list.length)c+='<span class="more">+'+(list.length-show.length)+'人</span>';
       h+=c+'</button>';
     }
     h+='</div>';
-    const box=$("month");
     box.innerHTML=h;
     box.querySelectorAll(".mcell").forEach(b=>b.onclick=()=>{cur=b.dataset.d;setMode("day")});
-    // 人ごとの色の見本
+    // 人ごとの色の見本（表の下）
     $("legendMonth").innerHTML=db.staff.map(s=>'<span><i class="sw pc '+pcol(s.name)+'"></i>'+esc(s.name)+'</span>').join("")+
-      '<span><i class="sw tent"></i>仮押さえ</span>';
+      '<span><i class="sw tent"></i>仮押さえあり</span>'+(narrow?'<span>「◯件」＝その日の予定の数</span>':'')+'<span>日付を押すと1日の表示</span>';
   }
 
   // ---------- くわしい内容 ----------
@@ -636,7 +673,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}
   // アプリに戻ってきたとき・日付が変わったときに読み直す
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&(!lastAt||Date.now()-lastAt>30000))load()});
   addEventListener("online",load);
-  let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(render,200)});
+  let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{dayH=0;render()},200)});
   setInterval(()=>{if(document.visibilityState!=="hidden")load()},REFRESH_MS);
   setInterval(()=>{if(mode==="day"&&cur===todayStr())render()},60000);   // 今の時刻の赤い線を動かす
 
