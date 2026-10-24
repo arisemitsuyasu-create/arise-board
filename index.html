@@ -1,0 +1,647 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#f5f6f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141917" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="予定ボード">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>ARISE 予定ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!--
+  ARISE 予定ボード（GitHub Pages に置くページ）
+  ・このファイルには、台帳のID・Apps ScriptのURL・合言葉は書いていません。
+  ・見る人に渡すURLの「#」のうしろ（#u=デプロイID&k=合言葉）を読んで、この端末に覚えます。
+  ・予定は読むだけです。このページから台帳は変えられません。
+-->
+<style>
+:root{
+  --bg:#f5f6f3; --panel:#ffffff; --ink:#1d2421; --muted:#5f6964; --line:#d9ddd9; --line-soft:#eceeeb;
+  --accent:#1f6f5c; --on-accent:#ffffff;
+  --tg:#2f6fb5; --tg-bg:#e3eefa;
+  --gd:#2e8a4f; --gd-bg:#e2f3e7;
+  --ot:#a8611c; --ot-bg:#f9ecdc;
+  --off-bg:#e7e4df; --off-ink:#7a756c;
+  --free:#88918c;
+  --warn:#b4472e; --warn-bg:#fbeae5;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --gut:16px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141917; --panel:#1b211f; --ink:#e6ebe8; --muted:#a1aaa5; --line:#323b38; --line-soft:#252c29;
+  --accent:#5cc2a6; --on-accent:#0f1513;
+  --tg:#8bbaf0; --tg-bg:#1d2d40;
+  --gd:#7bd398; --gd-bg:#1c3425;
+  --ot:#eaae6c; --ot-bg:#3a2a18;
+  --off-bg:#262d2a; --off-ink:#8d9691;
+  --free:#7b8681; --warn:#f09276; --warn-bg:#3a201a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --panel:#1b211f; --ink:#e6ebe8; --muted:#a1aaa5; --line:#323b38; --line-soft:#252c29;
+  --accent:#5cc2a6; --on-accent:#0f1513;
+  --tg:#8bbaf0; --tg-bg:#1d2d40;
+  --gd:#7bd398; --gd-bg:#1c3425;
+  --ot:#eaae6c; --ot-bg:#3a2a18;
+  --off-bg:#262d2a; --off-ink:#8d9691;
+  --free:#7b8681; --warn:#f09276; --warn-bg:#3a201a; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:var(--f-body);font-size:14px;line-height:1.5;-webkit-text-size-adjust:100%;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(var(--gut),env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(var(--gut),env(safe-area-inset-left,0px))}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+
+/* 上の帯（タイトル・操作） */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-weight:700;font-size:18px;margin:0;letter-spacing:.02em;white-space:nowrap}
+.status{font-size:12px;color:var(--muted);margin-top:1px}
+.status.err{color:var(--warn);font-weight:500}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.ctrls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{min-height:40px;min-width:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.daypick:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.btn.spin .ic{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.seg button{min-height:38px;min-width:52px;border:0;background:none;cursor:pointer;padding:0 14px;touch-action:manipulation}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);font-weight:700}
+.navgrp{display:inline-flex;gap:6px}
+.daypick{position:relative;display:inline-flex;align-items:baseline;gap:6px;border-radius:8px;cursor:pointer}
+.daypick .lbl{font-weight:700;font-size:22px;line-height:1.2}
+.daypick .lbl small{font-size:14px;font-weight:500;margin-left:2px}
+.daypick .lbl .tdy{display:inline-block;font-size:11px;font-weight:700;color:var(--on-accent);background:var(--accent);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:3px}
+.daypick .caret{font-size:12px;color:var(--muted)}
+.daypick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:12px;border-radius:3px;border-left:3px solid;display:inline-block}
+.sw.free{border:1px dashed var(--free)}
+.sw.tent{border:1px dashed var(--muted);border-left:3px dashed var(--muted)}
+.sw.off{background:repeating-linear-gradient(135deg,var(--off-ink) 0 2px,transparent 2px 5px);border:0}
+.sw.pc{border:0;background:var(--pc);border-radius:3px}
+
+/* 読み込めないときのお知らせ */
+.notice{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:16px 18px}
+.notice h2{margin:0 0 6px;font-size:16px;color:var(--warn)}
+.notice p{margin:0 0 6px}
+.notice ol{margin:6px 0 0;padding-left:1.4em}
+.notice .hint{color:var(--muted);font-size:13px}
+
+/* 日の表示（スタッフ1人1列） */
+.board-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:clip}
+.board{display:grid}
+.colhead{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);border-right:1px solid var(--line-soft);padding:8px 8px 6px;min-width:0}
+.colhead:last-of-type{border-right:0}
+.colhead .nm{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.colhead .tag{font-size:11px;color:var(--muted);line-height:1.3}
+.colhead .tag.off{color:var(--warn);font-weight:700}
+.colhead .tag.half{color:var(--ot);font-weight:700}
+.axis-head{position:sticky;top:0;z-index:6;background:var(--panel);border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.axis{position:relative;border-right:1px solid var(--line)}
+.axis div{position:absolute;right:6px;font-family:var(--f-mono);font-size:11px;color:var(--muted);transform:translateY(-50%);white-space:nowrap}
+.col{position:relative;border-right:1px solid var(--line-soft);min-width:0;--g:5px}
+.col:last-child{border-right:0}
+.col .hl{position:absolute;left:0;right:0;border-top:1px solid var(--line-soft)}
+.col .hl.noon{border-top:1px dashed var(--line)}
+.col.off,.halfoff{background:repeating-linear-gradient(135deg,var(--off-bg) 0 8px,transparent 8px 16px)}
+.halfoff{position:absolute;left:0;right:0}
+.offlabel{position:sticky;top:64px;margin:12px 6px 0;text-align:center;color:var(--off-ink);font-weight:700;font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 2px;overflow-wrap:anywhere}
+.ev{position:absolute;z-index:2;left:calc(var(--g) + (100% - 2*var(--g))*var(--l,0)/var(--n,1));width:calc((100% - 2*var(--g))/var(--n,1) - 2px);
+  border:0;border-radius:6px;border-left:4px solid;padding:3px 6px;overflow:hidden;font-size:12px;line-height:1.35;text-align:left;cursor:pointer;display:block}
+.ev:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ev .t{font-family:var(--f-mono);font-size:11px;font-weight:500;display:block}
+.ev .c{font-weight:700;display:block}
+.ev .m{color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ev .cs{display:none}
+.ev.tg{background:var(--tg-bg);border-color:var(--tg)} .ev.tg .c{color:var(--tg)}
+.ev.gd{background:var(--gd-bg);border-color:var(--gd)} .ev.gd .c{color:var(--gd)}
+.ev.ot{background:var(--ot-bg);border-color:var(--ot)} .ev.ot .c{color:var(--ot)}
+.ev.tentative{border:1px dashed;border-left:4px dashed;opacity:.9}
+.ev.tg.tentative{border-color:var(--tg)} .ev.gd.tentative{border-color:var(--gd)} .ev.ot.tentative{border-color:var(--ot)}
+.ev .kari{float:right;font-size:10px;font-weight:700;color:var(--muted);margin-left:4px}
+.free{position:absolute;z-index:1;left:5px;right:5px;border:1px dashed var(--free);border-radius:6px;display:flex;align-items:center;justify-content:center;gap:4px;color:var(--free);font-size:11px;font-family:var(--f-mono);overflow:hidden}
+.nowline{position:absolute;left:0;right:0;border-top:2px solid var(--warn);z-index:3;pointer-events:none}
+.nowline::before{content:"";position:absolute;left:-1px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+
+/* 月の表示（月曜はじまり） */
+.month{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:clip}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.mwd{position:sticky;top:0;z-index:2;background:var(--panel);padding:6px 4px;text-align:center;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.mwd.sun{color:var(--warn)} .mwd.sat{color:var(--tg)}
+.mcell{appearance:none;border:0;border-radius:0;min-height:100px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:4px 3px 6px;display:flex;flex-direction:column;gap:2px;cursor:pointer;min-width:0;background:none;text-align:left;touch-action:manipulation}
+.mcell:nth-child(7n){border-right:0}
+.mcell:hover{background:var(--line-soft)}
+.mcell:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.mcell.other{opacity:.45}
+.mnum{font-family:var(--f-mono);font-size:12px;font-weight:500;padding:0 4px;align-self:flex-start;border-radius:10px;line-height:20px;min-width:22px;text-align:center}
+.mcell.sun .mnum{color:var(--warn)} .mcell.sat .mnum{color:var(--tg)}
+.mcell.today .mnum{background:var(--accent);color:var(--on-accent)}
+.mcell.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.chip{font-size:11px;line-height:1.35;padding:1px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--pc);background:var(--line-soft);background:color-mix(in srgb,var(--pc) 15%,var(--panel))}
+.chip.off{background:var(--pc);color:#fff;font-weight:700}
+.chip.half{background:transparent;border:1px solid var(--pc);border-left-width:3px;color:var(--pc);font-weight:700}
+.chip.tent{border:1px dashed var(--pc);border-left:3px dashed var(--pc);background:transparent}
+.chip b{font-weight:700}
+.chip .tm{font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.more{font-size:10px;color:var(--muted)}
+.pcol-0{--pc:#8a5a3c}.pcol-1{--pc:#2f6bc0}.pcol-2{--pc:#9a6000}.pcol-3{--pc:#1c7a9c}.pcol-4{--pc:#5f6470}.pcol-5{--pc:#2b7d4b}.pcol-6{--pc:#7a4fb0}.pcol-7{--pc:#b54a7a}.pcol-u{--pc:#8a8f8c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.half{color:var(--ink)}}
+:root[data-theme="dark"] .chip.half{color:var(--ink)}
+
+.foot{font-size:12px;color:var(--muted)}
+
+/* くわしい内容（予定を押したとき） */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:0;width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 48px)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+.dlg-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px 8px 16px;border-bottom:1px solid var(--line-soft)}
+.dlg-h b{font-size:16px}
+.dlg-b{padding:10px 16px 16px}
+.dlg-b dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.dlg-b dt{color:var(--muted);font-size:13px}
+.dlg-b dd{margin:0;overflow-wrap:anywhere}
+
+/* スマホ（横にスライドしないで1画面に収める） */
+@media (max-width:600px){
+  :root{--gut:8px}
+  body{font-size:13px;padding-top:max(8px,env(safe-area-inset-top,0px))}
+  .wrap{gap:8px}
+  h1{font-size:16px}
+  .status{font-size:11px}
+  .top .btn{min-height:38px;padding:0 10px}
+  .bar{gap:8px}
+  .daypick{width:100%}
+  .daypick .lbl{font-size:20px}
+  .ctrls{width:100%;justify-content:space-between;gap:6px}
+  .navgrp .btn{padding:0 12px}
+  .legend{gap:4px 10px;font-size:11px}
+  .foot{font-size:11px}
+  .colhead{padding:6px 2px 4px;text-align:center}
+  .colhead .nm{font-size:12px}
+  .colhead .tag{font-size:10px}
+  .axis div{font-size:10px;right:3px}
+  .col{--g:2px}
+  .ev{padding:2px 2px 2px 3px;border-left-width:3px;font-size:10.5px;line-height:1.25;border-radius:4px}
+  .ev.tentative{border-left-width:3px}
+  .ev .t{font-size:10px}
+  .ev .t .te{display:none}
+  .ev .c{font-size:10px;letter-spacing:-.02em;overflow-wrap:anywhere}
+  .ev .cl{display:none} .ev .cs{display:inline}
+  .ev .m{font-size:10px;-webkit-line-clamp:4;overflow-wrap:anywhere}
+  .ev .kari{font-size:9px;margin-left:2px}
+  .free{left:2px;right:2px;font-size:9.5px;letter-spacing:-.02em;flex-direction:column;gap:0;line-height:1.25;text-align:center}
+  .free .fe{display:none}
+  .free .tl{font-size:8px}
+  .offlabel{margin:10px 2px 0;font-size:11px;padding:3px 1px;top:56px}
+  .mwd{font-size:11px;padding:4px 2px}
+  .mcell{min-height:68px;padding:2px 1px 4px;gap:2px}
+  .mnum{font-size:11px;line-height:18px;min-width:20px}
+  .chip{font-size:10px;line-height:1.3;padding:1px 2px;border-left-width:2px;white-space:normal;overflow-wrap:anywhere}
+  .chip b{display:block}
+  .chip .tm{white-space:nowrap}
+  .chip.off b,.chip.half b{display:inline}
+  .chip.tent{border-left-width:2px}
+  .chip .tm{font-size:9.5px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>ARISE 予定ボード</h1>
+      <div class="status" id="status" role="status" aria-live="polite">台帳を読み込んでいます…</div>
+    </div>
+    <button class="btn" id="reload" type="button" aria-label="台帳を読み直す"><span class="ic" aria-hidden="true">↻</span>更新</button>
+  </header>
+
+  <div class="bar">
+    <label class="daypick" title="押すと日付を選べます">
+      <span class="lbl" id="dayLabel">—</span><span class="caret" aria-hidden="true">▼</span>
+      <input id="pick" type="date" aria-label="日付を選ぶ">
+    </label>
+    <div class="ctrls">
+      <span class="seg" role="group" aria-label="表示の切り替え"><button id="vMonth" type="button" aria-pressed="true">月</button><button id="vDay" type="button" aria-pressed="false">日</button></span>
+      <span class="navgrp">
+        <button class="btn" id="prev" type="button" aria-label="前へ">‹</button>
+        <button class="btn" id="today" type="button">今日</button>
+        <button class="btn" id="next" type="button" aria-label="次へ">›</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <div class="legend" id="legendDay" hidden>
+    <span><i class="sw" style="background:var(--tg-bg);border-color:var(--tg)"></i>東京ガス</span>
+    <span><i class="sw" style="background:var(--gd-bg);border-color:var(--gd)"></i>グリーンデイズ</span>
+    <span><i class="sw" style="background:var(--ot-bg);border-color:var(--ot)"></i>そのほか</span>
+    <span><i class="sw tent"></i>仮押さえ</span>
+    <span><i class="sw free"></i>空き（1時間以上）</span>
+    <span><i class="sw off"></i>休み・稼働日でない</span>
+  </div>
+  <div class="legend" id="legendMonth" hidden></div>
+
+  <div class="month" id="month" hidden></div>
+  <div class="board-wrap" id="boardWrap" hidden><div class="board" id="board"></div></div>
+
+  <div class="foot">キャンセルの案件は出しません。休み・稼働日は台帳の「休み・稼働日」シートから。予定を変えるときは台帳かLINEで（このページからは変えられません）。</div>
+</div>
+
+<dialog id="detail" aria-labelledby="dlgTitle">
+  <div class="dlg-h"><b id="dlgTitle">予定</b><button class="btn" id="dlgClose" type="button">閉じる</button></div>
+  <div class="dlg-b" id="dlgBody"></div>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+  const DAY_START = 8*60, DAY_END = 19*60;   // 空きを数える枠（8:00〜19:00）
+  const WD = ["日","月","火","水","木","金","土"];
+  const REFRESH_MS = 120000;                   // 2分ごとに読み直す
+  const $ = id => document.getElementById(id);
+
+  // ---------- 小さな道具 ----------
+  const pad = n => String(n).padStart(2,"0");
+  const keyOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  const todayStr = () => keyOf(new Date());
+  const dateOf = s => new Date(s+"T00:00:00");
+  function shiftDay(s,n){const d=dateOf(s);d.setDate(d.getDate()+n);return keyOf(d)}
+  function shiftMonth(s,n){const d=dateOf(s);d.setDate(1);d.setMonth(d.getMonth()+n);return keyOf(d)}
+  // 「2026/10/23(金)」→「2026-10-23」
+  function ymdOf(v){const m=String(v||"").match(/(\d{4})\s*[\/\-年]\s*(\d{1,2})\s*[\/\-月]\s*(\d{1,2})/);return m?m[1]+"-"+pad(m[2])+"-"+pad(m[3]):""}
+  // 「2026年11月」のような月だけの行 →「2026-11」
+  function ymOf(v){if(ymdOf(v))return"";const m=String(v||"").match(/(\d{4})\s*[\/\-年]\s*(\d{1,2})\s*月?\s*$/);return m?m[1]+"-"+pad(m[2]):""}
+  function toMin(v){const m=String(v||"").match(/(\d{1,2}):(\d{2})/);return m?(+m[1])*60+(+m[2]):null}
+  const hm = n => Math.floor(n/60)+":"+pad(n%60);
+  const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const T = v => String(v==null?"":v).trim();
+  const isNarrow = () => innerWidth<=600;
+  function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+  function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
+
+  // 取引先の色と短い名前
+  function clientClass(c){if(/東京ガス/.test(c))return"tg";if(/グリーンデイズ|GREEN\s*DAYS/i.test(c))return"gd";return"ot"}
+  function shortClient(c){
+    if(/東京ガス/.test(c))return"東ガス";
+    if(/グリーンデイズ|GREEN\s*DAYS/i.test(c))return"GD";
+    if(/ミニメイド/.test(c))return"ミニメイド";
+    return c.replace(/株式会社|有限会社|合同会社|（株）|\(株\)/g,"").trim();
+  }
+  function longClient(c){return c.replace(/株式会社|有限会社|合同会社/g,"").replace(/（ミニメイド）/,"・ミニメイド").trim()}
+
+  // ---------- 表示の状態 ----------
+  let mode = recall("arise-board-mode")==="day" ? "day" : "month";
+  let cur = todayStr();                 // 開いたときはいつも今日
+  let db = null;                        // 読み込んだ台帳（整えたもの）
+  let lastAt = null, err = null, errDetail = "";
+
+  // ---------- 台帳の行を整える ----------
+  // 予定 A:ID B:日付 C:開始 D:終了 E:担当 F:種類 G:状態 H:得意先 I:案件番号 J:市区町村 L:在宅/空室 M:作業内容 N:作業時間（分）
+  function prepare(raw){
+    const today=dateOf(todayStr());
+    const staff=(raw.staff||[]).slice(0,14)
+      .filter(r=>T(r[0])&&T(r[19]))
+      .map((r,i)=>{
+        const note=T(r[1]);
+        // 「10/31で終了」のような書き方から終わりの日を読む
+        let end="",endLabel="";
+        const m=note.match(/(\d{1,2})\/(\d{1,2})\s*(?:で|に)?\s*終了/);
+        if(m){let y=today.getFullYear();let d=new Date(y,+m[1]-1,+m[2]);if(d-today>183*864e5)d=new Date(y-1,+m[1]-1,+m[2]);end=keyOf(d);endLabel=(+m[1])+"/"+(+m[2])+"で終了"}
+        return {name:T(r[0]),note,type:T(r[19]),ci:i,end,endLabel};
+      });
+    const plan=[];
+    (raw.plan||[]).forEach(r=>{
+      if(!T(r[0]))return;
+      const ymd=ymdOf(r[1]);if(!ymd)return;
+      const status=T(r[6]);if(/キャンセル/.test(status))return;
+      const s=toMin(r[2]);
+      const mins=parseInt(String(r[13]||"").replace(/[^\d]/g,""),10)||0;
+      let e=toMin(r[3]);if(s!=null&&(e==null||e<=s))e=s+(mins||60);
+      plan.push({id:T(r[0]),ymd,s,e,who:T(r[4]),kind:T(r[5]),status,client:T(r[7]),num:T(r[8]),city:T(r[9]),room:T(r[11]),menu:T(r[12]),mins});
+    });
+    const off=[];
+    (raw.off||[]).forEach(r=>{
+      const name=T(r[0]),k=T(r[2]);if(!name||!k)return;   // 区分が空＝取り消し
+      const ymd=ymdOf(r[1]),ym=ymd?"":ymOf(r[1]);if(!ymd&&!ym)return;
+      off.push({name,ymd,ym,k});
+    });
+    const ci={};staff.forEach(s=>ci[s.name]=s.ci);
+    return {staff,plan,off,ci};
+  }
+  function kindsFor(name,ymd){
+    const ym=ymd.slice(0,7);
+    return db.off.filter(o=>o.name===name&&(o.ymd===ymd||o.ym===ym)).map(o=>o.k);
+  }
+  const has=(arr,re)=>arr.some(k=>re.test(k));
+  const pcol=n=>n?("pcol-"+(db.ci[n]!=null?db.ci[n]%8:7)):"pcol-u";
+
+  // その日のその人の状態
+  function dayState(s,ymd,hasEv){
+    const k=kindsFor(s.name,ymd);
+    const r={off:false,tag:"",half:"",pending:false,k};
+    if(s.end&&ymd>s.end&&!hasEv){r.off=true;r.tag=s.endLabel;return r}
+    if(has(k,/^終日/)){r.off=true;r.tag="休み";return r}
+    if(s.type==="稼働日登録型"&&!has(k,/^稼働/)){r.off=true;r.tag=has(k,/^保留/)?"予定確認中":"稼働日ではない";return r}
+    if(has(k,/^保留/)){r.pending=true;r.tag="予定確認中";return r}
+    if(has(k,/^午前/)){r.half="am";r.tag="午前休み";return r}
+    if(has(k,/^午後/)){r.half="pm";r.tag="午後休み";return r}
+    if(s.type==="対象外"){r.tag="予定あり";return r}
+    if(s.type==="稼働日登録型"){r.tag="出勤日";return r}
+    r.tag="出勤";return r;
+  }
+
+  // ---------- 画面を描く ----------
+  function render(){
+    $("vMonth").setAttribute("aria-pressed",mode==="month");
+    $("vDay").setAttribute("aria-pressed",mode==="day");
+    $("prev").setAttribute("aria-label",mode==="month"?"前の月":"前の日");
+    $("next").setAttribute("aria-label",mode==="month"?"次の月":"次の日");
+    $("pick").value=cur;
+    const d=dateOf(cur);
+    $("dayLabel").innerHTML = mode==="month"
+      ? esc(d.getFullYear()+"年"+(d.getMonth()+1)+"月")
+      : esc((d.getMonth()+1)+"月"+d.getDate()+"日")+"<small>（"+WD[d.getDay()]+"）</small>"+(cur===todayStr()?'<span class="tdy">今日</span>':"");
+    renderStatus();
+    const ready=!!db;
+    $("month").hidden=!(ready&&mode==="month");
+    $("boardWrap").hidden=!(ready&&mode==="day");
+    $("legendDay").hidden=!(ready&&mode==="day");
+    $("legendMonth").hidden=!(ready&&mode==="month");
+    if(!ready)return;
+    if(mode==="month")renderMonth();else renderDay();
+  }
+
+  function renderDay(){
+    const evs={};
+    db.plan.forEach(p=>{if(p.ymd!==cur||p.s==null)return;const w=p.who||"未定";(evs[w]=evs[w]||[]).push(p)});
+    const cols=db.staff.filter(s=>s.type!=="対象外"||evs[s.name]).map(s=>Object.assign({},s));
+    const known=new Set(db.staff.map(s=>s.name));
+    // 名簿にない名前の予定（「未定」は一番右）
+    Object.keys(evs).filter(n=>!known.has(n)&&n!=="未定").forEach(n=>cols.push({name:n,type:"名簿外",ci:-1}));
+    if(evs["未定"])cols.push({name:"未定",type:"未定",ci:-1});
+
+    let lo=DAY_START,hi=DAY_END;
+    Object.values(evs).forEach(l=>l.forEach(v=>{lo=Math.min(lo,Math.floor(v.s/60)*60);hi=Math.max(hi,Math.ceil(v.e/60)*60)}));
+    hi=Math.min(hi,24*60);
+    const narrow=isNarrow();
+    const H=narrow?48:56;                       // 1時間の高さ
+    const px=m=>(m-lo)/60*H, height=px(hi);
+    const board=$("board");
+    board.style.gridTemplateColumns=(narrow?"28px":"48px")+" repeat("+cols.length+",minmax(0,1fr))";
+
+    let html='<div class="axis-head"></div>';
+    cols.forEach(s=>{
+      const list=evs[s.name]||[];
+      if(s.type==="未定")s.st={tag:"担当未定",off:false,half:"",pending:false};
+      else if(s.type==="名簿外")s.st={tag:"名簿にない名前",off:false,half:"",pending:false};
+      else s.st=dayState(s,cur,list.length>0);
+      const tc=s.st.off?" off":(s.st.half||s.st.pending)?" half":"";
+      const tag=narrow?(SHORT_TAG[s.st.tag]||s.st.tag):s.st.tag;
+      html+='<div class="colhead"><div class="nm">'+esc(s.name)+'</div><div class="tag'+tc+'" title="'+esc(s.st.tag)+'">'+esc(tag)+'</div></div>';
+    });
+    html+='<div class="axis" style="height:'+height+'px">';
+    for(let m=lo;m<=hi;m+=60)html+='<div style="top:'+Math.max(px(m),8)+'px">'+(narrow?(m/60):hm(m))+'</div>';
+    html+='</div>';
+
+    const nowM=cur===todayStr()?(()=>{const n=new Date();return n.getHours()*60+n.getMinutes()})():null;
+    cols.forEach(s=>{
+      const list=(evs[s.name]||[]).slice().sort((a,b)=>a.s-b.s||a.e-b.e);
+      const st=s.st, hatch=st.off&&!list.length;
+      let c='<div class="col'+(hatch?' off':'')+'" style="height:'+height+'px">';
+      for(let m=lo+60;m<hi;m+=60)c+='<div class="hl'+(m===720?' noon':'')+'" style="top:'+px(m)+'px"></div>';
+      if(hatch)c+='<div class="offlabel">'+esc(narrow?(SHORT_TAG[st.tag]||st.tag):st.tag)+'</div>';
+      if(st.half==="am")c+='<div class="halfoff" style="top:'+px(Math.max(lo,DAY_START))+'px;height:'+(px(720)-px(Math.max(lo,DAY_START)))+'px"></div>';
+      if(st.half==="pm")c+='<div class="halfoff" style="top:'+px(720)+'px;height:'+(px(DAY_END)-px(720))+'px"></div>';
+      // 空き：出勤の人だけ、8:00〜19:00の中で60分以上
+      if(!st.off&&!st.pending&&(s.type==="休み登録型"||s.type==="稼働日登録型")){
+        let a=st.half==="am"?720:DAY_START;
+        const z=st.half==="pm"?720:DAY_END;
+        list.forEach(v=>{if(Math.min(v.s,z)-a>=60)c+=free(a,Math.min(v.s,z));a=Math.max(a,v.e)});
+        if(z-a>=60)c+=free(a,z);
+      }
+      lanes(list);
+      list.forEach(v=>{
+        const top=px(v.s)+1,h=Math.max(px(v.e)-px(v.s)-2,22);
+        const label=v.client||v.kind||"予定";
+        const sub=[v.city,v.menu].filter(Boolean).join("　");
+        c+='<button type="button" class="ev '+clientClass(v.client)+(v.status==="仮押さえ"?' tentative':'')+'" data-id="'+esc(v.id)+'" data-who="'+esc(s.name)+'" style="top:'+top+'px;height:'+h+'px;--l:'+v.lane+';--n:'+v.nl+'" aria-label="'+esc(hm(v.s)+"〜"+hm(v.e)+" "+label+(v.status==="仮押さえ"?" 仮押さえ":""))+'">'+
+          (v.status==="仮押さえ"?'<span class="kari">仮</span>':'')+
+          '<span class="t">'+hm(v.s)+'<span class="te">〜'+hm(v.e)+'</span></span>'+
+          '<span class="c"><span class="cl">'+esc(longClient(label))+'</span><span class="cs">'+esc(shortClient(label))+'</span></span>'+
+          (sub?'<span class="m">'+esc(sub)+'</span>':'')+'</button>';
+      });
+      if(nowM!=null&&nowM>=lo&&nowM<=hi)c+='<div class="nowline" style="top:'+px(nowM)+'px"></div>';
+      html+=c+'</div>';
+    });
+    board.innerHTML=html;
+    board.querySelectorAll(".ev").forEach(b=>b.onclick=()=>openDetail(b.dataset.id,b.dataset.who));
+    function free(a,b){return'<div class="free" style="top:'+(px(a)+2)+'px;height:'+(px(b)-px(a)-4)+'px"><span>空き</span><span>'+hm(a)+'<span class="tl">〜</span><span class="fe">'+hm(b)+'</span></span></div>'}
+  }
+  // スマホでは列の見出しを短くする
+  const SHORT_TAG={"稼働日ではない":"稼働日外","午前休み":"午前休","午後休み":"午後休","予定確認中":"確認中","予定あり":"予定","担当未定":"未定","名簿にない名前":"名簿外"};
+  // 同じ人の予定が重なったときは横に並べる
+  function lanes(list){
+    let group=[],end=-1;const groups=[];
+    list.forEach(v=>{if(v.s>=end){group=[];groups.push(group)}group.push(v);end=Math.max(end,v.e)});
+    groups.forEach(g=>{const ends=[];g.forEach(v=>{let i=ends.findIndex(x=>x<=v.s);if(i<0){i=ends.length;ends.push(0)}ends[i]=v.e;v.lane=i});g.forEach(v=>v.nl=ends.length)});
+  }
+
+  function renderMonth(){
+    const d0=dateOf(cur);
+    const first=new Date(d0.getFullYear(),d0.getMonth(),1);
+    const start=new Date(first);start.setDate(1-((first.getDay()+6)%7));   // 月曜はじまり
+    const last=new Date(d0.getFullYear(),d0.getMonth()+1,0);
+    const end=new Date(last);end.setDate(last.getDate()+(6-((last.getDay()+6)%7)));
+    const lo=keyOf(start),hi=keyOf(end);
+    const offs={},jobs={};
+    db.off.forEach(o=>{if(!o.ymd||o.ymd<lo||o.ymd>hi)return;(offs[o.ymd]=offs[o.ymd]||[]).push(o)});
+    db.plan.forEach(p=>{if(p.ymd<lo||p.ymd>hi)return;(jobs[p.ymd]=jobs[p.ymd]||[]).push(p)});
+
+    let h='<div class="mgrid">';
+    ["月","火","水","木","金","土","日"].forEach((w,i)=>h+='<div class="mwd'+(i===5?' sat':i===6?' sun':'')+'">'+w+'</div>');
+    const today=todayStr();
+    for(let x=new Date(start);keyOf(x)<=hi;x.setDate(x.getDate()+1)){
+      const k=keyOf(x),wd=x.getDay();
+      const cl=["mcell"];
+      if(x.getMonth()!==d0.getMonth())cl.push("other");
+      if(wd===0)cl.push("sun");if(wd===6)cl.push("sat");
+      if(k===today)cl.push("today");
+      const o=offs[k]||[],j=(jobs[k]||[]).slice().sort((a,b)=>(a.s==null?9999:a.s)-(b.s==null?9999:b.s)||(db.ci[a.who]??99)-(db.ci[b.who]??99));
+      let c='<button type="button" class="'+cl.join(" ")+'" data-d="'+k+'" aria-label="'+(x.getMonth()+1)+'月'+x.getDate()+'日（'+WD[wd]+'） 予定'+j.length+'件">';
+      c+='<span class="mnum">'+x.getDate()+'</span>';
+      o.filter(v=>/^終日/.test(v.k)).forEach(v=>c+='<span class="chip off '+pcol(v.name)+'">'+esc(v.name)+'休み</span>');
+      o.filter(v=>/^(午前|午後)/.test(v.k)).forEach(v=>c+='<span class="chip half '+pcol(v.name)+'">'+esc(v.name)+' '+esc(v.k.slice(0,2))+'休</span>');
+      j.forEach(v=>{
+        c+='<span class="chip '+pcol(v.who)+(v.status==="仮押さえ"?' tent':'')+'"><b>'+esc(v.who||"未定")+'</b> '+
+          (v.s!=null?'<span class="tm">'+hm(v.s)+'</span> ':'')+'<span class="cn">'+esc(shortClient(v.client||v.kind||""))+'</span></span>';
+      });
+      h+=c+'</button>';
+    }
+    h+='</div>';
+    const box=$("month");
+    box.innerHTML=h;
+    box.querySelectorAll(".mcell").forEach(b=>b.onclick=()=>{cur=b.dataset.d;setMode("day")});
+    // 人ごとの色の見本
+    $("legendMonth").innerHTML=db.staff.map(s=>'<span><i class="sw pc '+pcol(s.name)+'"></i>'+esc(s.name)+'</span>').join("")+
+      '<span><i class="sw tent"></i>仮押さえ</span>';
+  }
+
+  // ---------- くわしい内容 ----------
+  function openDetail(id,who){
+    const v=db.plan.find(p=>p.id===id&&p.ymd===cur&&(p.who||"未定")===who)||db.plan.find(p=>p.id===id);
+    if(!v)return;
+    const d=dateOf(v.ymd);
+    const rows=[
+      ["日にち",(d.getMonth()+1)+"月"+d.getDate()+"日（"+WD[d.getDay()]+"）"],
+      ["時間",v.s!=null?hm(v.s)+"〜"+hm(v.e)+(v.mins?"（"+v.mins+"分）":""):""],
+      ["担当",v.who||"未定"],
+      ["状態",v.status],
+      ["得意先",v.client],
+      ["案件番号",v.num],
+      ["市区町村",v.city],
+      ["在宅／空室",v.room],
+      ["種類",v.kind],
+      ["作業内容",v.menu]
+    ].filter(r=>r[1]);
+    $("dlgTitle").textContent=(v.s!=null?hm(v.s)+" ":"")+(shortClient(v.client||v.kind||"予定")||"予定");
+    $("dlgBody").innerHTML="<dl>"+rows.map(r=>"<dt>"+esc(r[0])+"</dt><dd>"+esc(r[1])+"</dd>").join("")+"</dl>";
+    const dlg=$("detail");
+    if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");
+  }
+  $("dlgClose").onclick=()=>$("detail").close();
+  $("detail").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.close()});
+
+  // ---------- お知らせ・状態 ----------
+  const time = t => new Date(t).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+  function renderStatus(){
+    const el=$("status"), nb=$("notice");
+    if(err){
+      el.className="status err";
+      el.textContent=db?(SHORT[err]||SHORT.other)+(lastAt?"（"+time(lastAt)+"に読んだ内容を表示中）":""):(SHORT[err]||SHORT.other);
+    }else if(!db){el.className="status";el.textContent="台帳を読み込んでいます…"}
+    else{el.className="status";el.textContent=time(lastAt)+" に読み込み・2分ごとに自動更新"}
+    // データが無いときは、大きなお知らせで理由と直し方を出す
+    if(err&&(!db||err==="nocfg"||err==="badkey")){nb.hidden=false;nb.innerHTML=LONG[err]||LONG.other}
+    else nb.hidden=true;
+  }
+  const SHORT={
+    nocfg:"このページのアドレスが足りません",
+    badkey:"合言葉が違うので台帳を読めません",
+    offline:"電波がありません",
+    reach:"台帳につながりませんでした",
+    timeout:"台帳の返事がありません",
+    server:"台帳を読む途中でエラーが出ました",
+    other:"台帳を読めませんでした"
+  };
+  const LONG={
+    nocfg:'<h2>このページのアドレスが足りません</h2>'+
+      '<p>送られてきた、<b>「#u=…&amp;k=…」まで入ったURL</b>で開いてください。1回開けば、この端末が覚えます。</p>'+
+      '<p class="hint">ホーム画面のアイコンから開いてこの表示が出るとき：アイコンを長押しして削除し、届いたURLをSafari（AndroidはChrome）で開いてから、もう一度「ホーム画面に追加」してください。</p>',
+    badkey:'<h2>合言葉が違います</h2>'+
+      '<p>合言葉が新しくなったか、URLの「k=」のうしろが欠けています。<b>新しいURLを送ってもらって</b>、それを開いてください。</p>',
+    offline:'<h2>電波がありません</h2><p>インターネットにつながってから「更新」を押してください。</p>',
+    reach:'<h2>台帳につながりませんでした</h2>'+
+      '<p>電波が弱いか、URLの「u=」のうしろ（デプロイID）が違う可能性があります。</p>'+
+      '<ol><li>電波のよいところで「更新」を押す</li><li>それでもだめなら、届いたURLをもう一度開く</li><li>直らなければ、URLを送ってくれた人に連絡</li></ol>',
+    timeout:'<h2>台帳の返事がありません</h2><p>少し待ってから「更新」を押してください。</p>',
+    server:'<h2>台帳を読む途中でエラーが出ました</h2><p>少し待って「更新」を押してください。続くときは、URLを送ってくれた人にこの文をそのまま送ってください。</p>',
+    other:'<h2>台帳を読めませんでした</h2><p>「更新」を押してもう一度試してください。</p>'
+  };
+  function setErr(code,detail){
+    err=code;errDetail=detail||"";
+    if(code==="server"&&errDetail)LONG.server='<h2>台帳を読む途中でエラーが出ました</h2><p>少し待って「更新」を押してください。続くときは、URLを送ってくれた人に次の文をそのまま送ってください。</p><p class="hint">'+esc(errDetail)+'</p>';
+  }
+
+  // ---------- 台帳を読む ----------
+  // URLの「#u=デプロイID&k=合言葉」を読み、この端末に覚える（ページ自体には書かない）
+  function cfg(){
+    const q=new URLSearchParams((location.hash||"").replace(/^#/,""));
+    let u=T(q.get("u")),k=T(q.get("k"));
+    if(u&&k){
+      u=u.replace(/^https?:\/\/script\.google\.com\/macros\/s\//,"").replace(/\/exec.*$/,"");
+      if(u!==recall("arise-board-u")||k!==recall("arise-board-k"))store("arise-board-cache",null);
+      store("arise-board-u",u);store("arise-board-k",k);
+    }else{u=recall("arise-board-u")||"";k=recall("arise-board-k")||""}
+    return {u,k};
+  }
+  let busy=false;
+  async function load(){
+    const c=cfg();
+    if(!c.u||!c.k){setErr("nocfg");render();return}
+    if(busy)return;busy=true;
+    $("reload").classList.add("spin");
+    const ctl=window.AbortController?new AbortController():null;
+    const timer=setTimeout(()=>ctl&&ctl.abort(),25000);
+    try{
+      const url="https://script.google.com/macros/s/"+encodeURIComponent(c.u)+"/exec?format=json&k="+encodeURIComponent(c.k);
+      let res;
+      try{res=await fetch(url,{cache:"no-store",redirect:"follow",signal:ctl?ctl.signal:undefined})}
+      catch(e){throw {code:(e&&e.name==="AbortError")?"timeout":(navigator.onLine===false?"offline":"reach")}}
+      if(!res.ok)throw {code:"reach"};
+      let j;try{j=await res.json()}catch(e){throw {code:"reach"}}
+      if(j&&j.error)throw {code:j.error==="bad_key"?"badkey":"server",detail:j.error==="bad_key"?"":String(j.error)};
+      if(!j||!Array.isArray(j.plan))throw {code:"server",detail:"返ってきたデータの形が違います"};
+      db=prepare(j);lastAt=Date.now();err=null;
+      store("arise-board-cache",JSON.stringify({at:lastAt,data:{plan:j.plan,off:j.off,staff:j.staff}}));
+    }catch(e){
+      setErr((e&&e.code)||"other",e&&e.detail);
+      if(err==="badkey"){db=null;store("arise-board-cache",null)}   // 古い合言葉の内容は出さない
+    }finally{
+      clearTimeout(timer);busy=false;$("reload").classList.remove("spin");render();
+    }
+  }
+  // 前回読んだ内容を先に出しておく（開いてすぐ見られる・電波がなくても見られる）
+  (function warm(){
+    const c=cfg();if(!c.u||!c.k)return;
+    try{const x=JSON.parse(recall("arise-board-cache")||"null");if(x&&x.data){db=prepare(x.data);lastAt=x.at}}catch(e){}
+  })();
+
+  // ---------- 操作 ----------
+  function setMode(m){mode=m;store("arise-board-mode",m);render();scrollTo({top:0})}
+  function setDay(s){cur=s;render()}
+  const step=n=>setDay(mode==="month"?shiftMonth(cur,n):shiftDay(cur,n));
+  $("vMonth").onclick=()=>setMode("month");
+  $("vDay").onclick=()=>setMode("day");
+  $("prev").onclick=()=>step(-1);
+  $("next").onclick=()=>step(1);
+  $("today").onclick=()=>setDay(todayStr());
+  $("pick").onchange=e=>{if(e.target.value)setDay(e.target.value)};
+  $("reload").onclick=load;
+  addEventListener("keydown",e=>{
+    if(e.target.closest&&e.target.closest("input,dialog"))return;
+    if(e.key==="ArrowLeft")step(-1);else if(e.key==="ArrowRight")step(1);
+  });
+  // スマホ：左右にさっと払うと前・次へ
+  let sx=null,sy=0,st=0;
+  addEventListener("touchstart",e=>{if(e.touches.length!==1||e.target.closest("dialog")){sx=null;return}sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now()},{passive:true});
+  addEventListener("touchend",e=>{
+    if(sx==null)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;sx=null;
+    if(Date.now()-st<600&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*2)step(dx<0?1:-1);
+  },{passive:true});
+  addEventListener("hashchange",load);
+  // アプリに戻ってきたとき・日付が変わったときに読み直す
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&(!lastAt||Date.now()-lastAt>30000))load()});
+  addEventListener("online",load);
+  let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(render,200)});
+  setInterval(()=>{if(document.visibilityState!=="hidden")load()},REFRESH_MS);
+  setInterval(()=>{if(mode==="day"&&cur===todayStr())render()},60000);   // 今の時刻の赤い線を動かす
+
+  render();
+  load();
+})();
+</script>
+</body></html>
